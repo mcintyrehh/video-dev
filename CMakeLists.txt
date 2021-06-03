@@ -3,6 +3,7 @@ project(video-dev C CXX)
 set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(lib/glfw)
+add_subdirectory(lib/FFmpeg)
 
 if(APPLE)
     list(APPEND EXTRA_LIBS
@@ -20,4 +21,4 @@ else()
 endif()
 
 add_executable(video-dev src/main.cpp)
-target_link_libraries(video-dev glfw ${EXTRA_LIBS})
+target_link_libraries(video-dev FFmpeg glfw ${EXTRA_LIBS})
