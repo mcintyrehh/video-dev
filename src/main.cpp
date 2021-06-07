@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <GLFW/glfw3.h>
 
+/**
+ * Returns false if it can't load a frame
+ * Give it a file name and it returns width, height and data for image data
+ * */
+bool load_frame(const char* filename, int* width, int* height, unsigned char** data);
+
 int main(int argc, const char **argv)
 {
     GLFWwindow *window;
@@ -21,33 +27,16 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    // create buffer of 100 pixels by 100 pixels, each pixel has 3 bytes of data: red, blue, green
-    unsigned char *data = new unsigned char[100 * 100 * 3];
-    //100px pure red square
-    for (int y = 0; y < 100; ++y)
-    {
-        for (int x = 0; x < 100; ++x)
-        {
-            data[y * 100 * 3 + x * 3] = 0xff;
-            data[y * 100 * 3 + x * 3 + 1] = 0x00;
-            data[y * 100 * 3 + x * 3 + 2] = 0x00;
-        }
-    }
-    // blue inner square of 50 px
-    for (int y = 25; y < 75; ++y)
-    {
-        for (int x = 25; x < 75; ++x)
-        {
-            data[y * 100 * 3 + x * 3] = 0x00;
-            data[y * 100 * 3 + x * 3 + 1] = 0x00;
-            data[y * 100 * 3 + x * 3 + 2] = 0xff;
-        }
+    int frame_width, frame_height;
+    unsigned char* frame_data;
+
+    if (!load_frame("../build/Wayfinder_MediaHub_Test", &frame_width, &frame_height, &frame_data)) {
+        printf("Couldn't load video frame\n");
+        return 1;
     }
 
     //Create texture
     GLuint tex_handle;
-    int tex_width = 100;
-    int tex_height = 100;
     //generate 1 texture, give me back the name of the texture in the handle
     glGenTextures(1, &tex_handle);
     //the next operations that we're going to do on GL_TEXTURE_2D are on this texture we just generated
@@ -62,7 +51,7 @@ int main(int argc, const char **argv)
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     
     //load in texture data into gl texture image 2d https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, frame_data);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -86,9 +75,9 @@ int main(int argc, const char **argv)
         glBindTexture(GL_TEXTURE_2D, tex_handle);
         glBegin(GL_QUADS);
             glTexCoord2d(0,0); glVertex2i(0,0); // lower left corner
-            glTexCoord2d(1,0); glVertex2i(tex_width,0); // lower right corner
-            glTexCoord2d(1,1); glVertex2i(tex_width, tex_height); // upper right corner
-            glTexCoord2d(0,1); glVertex2i(0, tex_height); // upper left corner
+            glTexCoord2d(1,0); glVertex2i(frame_width,0); // lower right corner
+            glTexCoord2d(1,1); glVertex2i(frame_width, frame_height); // upper right corner
+            glTexCoord2d(0,1); glVertex2i(0, frame_height); // upper left corner
         glEnd();
         glDisable(GL_TEXTURE_2D);
 
